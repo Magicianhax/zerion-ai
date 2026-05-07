@@ -105,6 +105,7 @@ function printUsage() {
       "--deny-transfers": "Block raw ETH/native transfers",
       "--deny-approvals": "Block ERC-20 approval calls",
       "--allowlist <addresses>": "Only allow interaction with listed addresses",
+      "--daily-tx-limit <n>": "Cap signed transactions per 24h rolling window (anti-churn guard)",
     },
     env: {
       "ZERION_API_KEY": "API key (get at dashboard.zerion.io)",

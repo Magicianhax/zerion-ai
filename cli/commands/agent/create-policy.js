@@ -73,6 +73,7 @@ export default async function agentCreatePolicy(args, flags) {
   if (flags["deny-transfers"]) execPolicies.push("deny-transfers");
   if (flags["deny-approvals"]) execPolicies.push("deny-approvals");
   if (flags.allowlist) execPolicies.push("allowlist");
+  if (flags["daily-tx-limit"]) execPolicies.push("spend-cap");
 
   if (execPolicies.length > 0) {
     // OWS supports one executable per policy — use a dispatcher
@@ -83,11 +84,20 @@ export default async function agentCreatePolicy(args, flags) {
     if (flags.allowlist) {
       config.allowed_addresses = flags.allowlist.split(",").map((a) => a.trim());
     }
+    if (flags["daily-tx-limit"]) {
+      const limit = parseInt(flags["daily-tx-limit"], 10);
+      if (!Number.isFinite(limit) || limit <= 0) {
+        printError("invalid_daily_tx_limit", `--daily-tx-limit must be a positive integer, got "${flags["daily-tx-limit"]}"`);
+        process.exit(1);
+      }
+      config.daily_tx_limit = limit;
+      config.token_name = name;
+    }
   }
 
   if (rules.length === 0 && !executable) {
     printError("empty_policy", "Policy must have at least one rule", {
-      suggestion: "Add --chains, --expires, --deny-transfers, --deny-approvals, or --allowlist",
+      suggestion: "Add --chains, --expires, --deny-transfers, --deny-approvals, --allowlist, or --daily-tx-limit",
     });
     process.exit(1);
   }
