@@ -77,7 +77,17 @@ export async function requireAgentToken(context = "", targetWallet) {
  * Enforce executable policies attached to the active agent token.
  * OWS enforces native rules (allowed_chains, expires_at) but does NOT run
  * executable scripts — we must do it here before signing.
- * @param {{ to: string, value: string|bigint, data: string, chain: string }} txInfo
+ *
+ * @param {object} txInfo
+ * @param {string} [txInfo.to]        Recipient address (EVM 0x or Solana base58)
+ * @param {string|bigint} [txInfo.value]  Native value (lamports for Solana, wei for EVM)
+ * @param {string} [txInfo.data]      Calldata (EVM only — "0x" for native transfers)
+ * @param {string} [txInfo.chain]     Chain identifier ("solana" or an EVM chain name).
+ *                                     Defaults to "evm" for backward compat.
+ * @param {string} [txInfo.operation] Operation type — "transfer" | "swap" | "approve" |
+ *                                     "bridge". Lets policies distinguish a raw send
+ *                                     from a DEX swap on chains where calldata-shape
+ *                                     heuristics don't apply (Solana).
  */
 export async function enforceExecutablePolicies(txInfo) {
   const walletName = getConfigValue("defaultWallet");
@@ -98,6 +108,8 @@ export async function enforceExecutablePolicies(txInfo) {
       to: txInfo.to || null,
       value: String(txInfo.value || "0"),
       data: txInfo.data || "0x",
+      chain: txInfo.chain || "evm",
+      operation: txInfo.operation || null,
     },
   };
 

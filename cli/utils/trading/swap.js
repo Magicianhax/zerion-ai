@@ -202,6 +202,14 @@ export async function executeSwap(quote, walletName, passphrase, { timeout } = {
 }
 
 async function executeSolanaSwap(quote, walletName, passphrase) {
+  // Run executable policies before signing — same gap as send.js had on
+  // the Solana path. operation:"swap" lets deny-transfers correctly
+  // permit this while still blocking native transfers.
+  await enforceExecutablePolicies({
+    chain: "solana",
+    operation: "swap",
+  });
+
   // Solana txs from the swap API are base64-encoded raw transactions.
   const result = await signAndBroadcastSolana(
     quote.transactionSwapSolana,

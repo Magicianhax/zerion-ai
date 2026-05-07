@@ -229,6 +229,19 @@ async function sendOnSolana({ token, amount, to, flags }) {
 
   try {
     const passphrase = await requireAgentToken("for trading", walletName);
+
+    // Solana sends previously bypassed executable policies entirely (the
+    // EVM path called this; the Solana path didn't). That meant
+    // deny-transfers/allowlist/spend-cap silently let any Solana send
+    // through. Now we run them with chain+operation set so policy scripts
+    // can apply Solana-aware logic.
+    await enforceExecutablePolicies({
+      chain: "solana",
+      operation: "transfer",
+      to,
+      value: amount,
+    });
+
     const result = await sendSolanaNative({
       from: address,
       to,
