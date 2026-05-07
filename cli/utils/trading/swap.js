@@ -100,11 +100,11 @@ export async function getSwapQuote({
     "slippage_percent": slippage ?? getConfigValue("slippage") ?? DEFAULT_SLIPPAGE,
   };
 
-  // Cross-chain destinations are passed as the top-level `to` param, NOT
-  // `output[to]`. /swap/quotes/ defaults `to` to `from` when omitted, which
-  // breaks Solana ↔ EVM bridges (chain types don't match). Always send `to`
-  // when we have one different from `from`.
-  if (outputReceiver && outputReceiver !== walletAddress) {
+  // Destination receiver passes as top-level `to` (not `output[to]`).
+  // /swap/quotes/ no longer defaults `to` to `from` — it returns
+  // "400: 'to' is required" when omitted, even for same-address same-chain
+  // swaps. Always send `to`.
+  if (outputReceiver) {
     params.to = outputReceiver;
   }
 

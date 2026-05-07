@@ -1,0 +1,8 @@
+# Force LF line endings on policy scripts. They have shebang lines and run
+# as executables on Linux/macOS via the OWS dispatcher; CRLF makes the
+# shebang point at "node\r" which exits 127.
+*.mjs text eol=lf
+*.sh text eol=lf
+
+# Same for any other code that might be invoked as a Linux executable.
+cli/zerion.js text eol=lf
